@@ -1,8 +1,16 @@
 import uuid
 import time
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 
-class Task:
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://scott:tiger@localhost/mydatabase'
+db = SQLAlchemy(app)
+
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     def __init__(self):
         self.id = str(uuid.uuid4())
         self.description = ''

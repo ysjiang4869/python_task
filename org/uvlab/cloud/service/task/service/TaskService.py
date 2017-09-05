@@ -1,20 +1,23 @@
-import psycopg2
+from Task import Task
+from Task import db
 
 
 class TaskService:
 
     def __init__(self):
-        self.conn = psycopg2.connect("host='localhost' dbname='task' user='postgres' password='root'")
-        print 'connect successful!'
-        self.cursor = self.conn.cursor()
+        self.db = db
 
-    def find(self):
-        self.cursor.execute("select * from task where id>690")
-        rows = self.cursor.fetchall()
-        for row in rows:
-            print 'id=', row[0], ',uuid=', row[1], ',description=', row[2], ',leaderid=', row[3], '\n'
-        self.conn.close()
+    def add(self, task):
+        db.session.add(task)
+        db.session.commit()
 
-if __name__ == '__main__':
-    svc = TaskService()
-    svc.find()
+    def find(self, offset, limit, order, desc, **params):
+        if desc:
+            orders = order + "desc"
+        else:
+            orders = order
+        return Task.query.filter_by(**params).order_by(orders).limit(limit).offset(offset).all()
+
+    def get(self, uuid):
+        task = Task.query.filter_by(uuid=uuid).first()
+        return task

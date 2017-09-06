@@ -70,6 +70,10 @@ class Task(db.Model):
         self.actcost = 0
         self.quality = 0
 
+    def __repr__(self):
+        return '<Task: %r>' % str(self.uuid)
+
+
 if __name__ == '__main__':
     task = Task("by python", 18, 18)
     task.repeatperiod=5

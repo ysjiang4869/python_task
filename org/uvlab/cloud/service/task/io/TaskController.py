@@ -1,11 +1,11 @@
 import json
 import uuid
 from datetime import datetime, date
-
-from flask import Response, request
+import collections
+from flask import Response, request, abort
 from sqlalchemy.orm.state import InstanceState
 
-from org.uvlab.cloud.service.task.service.Task import app, Task
+from org.uvlab.cloud.service.task.service.Task import app, dict2task
 from org.uvlab.cloud.service.task.service.TaskService import TaskService
 
 svc = TaskService()
@@ -47,7 +47,7 @@ def find():
         except KeyError:
             pass
     tasks = svc.find(offset, limit, order, desc, **args)
-    ret = {}
+    ret = collections.OrderedDict()
     for task in tasks:
         ret[str(task.uuid)] = task.__dict__
     return Response(json.dumps(ret, cls=ComplexEncoder), mimetype='application/json')
@@ -55,24 +55,45 @@ def find():
 
 @app.route('/task/<uuid:task_id>', methods=['GET'])
 def get(task_id):
-    print str(task_id)
-    task = svc.get('c770c84d-71dc-4cfb-b5d4-215516dbd0c2')
-    res = json.dumps(task.__dict__, cls=ComplexEncoder)
+    task = svc.get(task_id)
+    if task is None:
+        res = None
+    else:
+        res = json.dumps(task.__dict__, cls=ComplexEncoder)
     return Response(res, mimetype='application/json')
 
 
 @app.route('/task', methods=['POST'])
 def add():
     body = request.get_json(force=True)
-    task = {}
-    for k, v in body.items():
-        task[str(k)] = str(v)
-    # svc.add(task)
-    print task
+    task = dict2task(body)
+    task.crtuser = 18
+    task.upduser = 18
+    svc.add(task)
+    res = json.dumps(task.__dict__, cls=ComplexEncoder)
+    return Response(res, mimetype='application/json')
+
+
+@app.route('/task/<uuid:task_id>', methods=['PUT'])
+def update(task_id):
+    body = request.get_json(force=True)
+    if 'uuid' not in body:
+        abort(404)
+    if str(task_id) != str(body['uuid']):
+        abort(500)
+    svc.set(task_id, body)
+    return Response(None, mimetype='application/json')
+
+
+@app.route('/task/<uuid:task_id>', methods=['DELETE'])
+def delete(task_id):
+    svc.delete(task_id)
+    return Response(None, mimetype='application/json')
 
 
 def start():
     app.run(debug=True)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

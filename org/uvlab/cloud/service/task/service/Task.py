@@ -48,41 +48,62 @@ class Task(db.Model):
     color = db.Column(db.Integer)
     quality = db.Column(db.Integer, nullable=False, default=0)
 
-    def __init__(self, description, crtuser, upduser):
-        self.description = description
-        self.uuid = uuid.uuid4()
-        self.rowstate=1
-        self.crtdate = datetime.now()
-        self.upddate = datetime.now()
-        self.crtuser = crtuser
-        self.owner = [crtuser]
-        self.upduser = upduser
-        self.priority = 0
-        self.importance = 0
-        self.urgency = 0
-        self.category = 0
-        self.objectstate = 0
-        self.durationtype = 4
-        self.repeatable = 1
-        self.repeatperiod = 0
-        self.percentage = 0
-        self.expcost = 0
-        self.actcost = 0
-        self.quality = 0
+    def __init__(task, description, crtuser, upduser):
+        task.description = description
+        task.uuid = uuid.uuid4()
+        task.rowstate=1
+        task.crtdate = datetime.now()
+        task.upddate = datetime.now()
+        task.crtuser = crtuser
+        task.owner = [crtuser]
+        task.upduser = upduser
+        task.priority = 0
+        task.importance = 0
+        task.urgency = 0
+        task.category = 0
+        task.objectstate = 0
+        task.durationtype = 4
+        task.repeatable = 1
+        task.repeatperiod = 0
+        task.percentage = 0
+        task.expcost = 0
+        task.actcost = 0
+        task.quality = 0
 
-    def __repr__(self):
-        return '<Task: %r>' % str(self.uuid)
+    def __repr__(task):
+        return '<Task: %r>' % str(task.uuid)
 
 
-if __name__ == '__main__':
-    task = Task("by python", 18, 18)
-    task.repeatperiod=5
-    # db.session.add(task)
-    # db.session.commit()
-    params = {'description': 'by python'}
-    tasks = Task.query.filter_by(**params).order_by("crtdate desc").limit(10).offset(0).all()
-    for item in tasks:
-        print item.id
-        print item.uuid
-        # print item.owner[0]
+def dict2task(d):
+    task = Task(d.get('description'), d.get('crtuser'), d.get('upduser'))
+    task.uuid = d.get('uuid')
+    task.rowstate = d.get('rowstate', task.rowstate)
+    task.crtdate = d.get('crtdate', task.crtdate)
+    task.upddate = d.get('upddate', task.upddate)
+    task.priority = d.get('priority', task.priority)
+    task.importance = d.get('importance', task.importance)
+    task.urgency = d.get('urgency', task.urgency)
+    task.category = d.get('category', task.category)
+    task.objectstate = d.get('objectstate', task.objectstate)
+    task.durationtype = d.get('durationtype', task.durationtype)
+    task.repeatable = d.get('repeatable', task.repeatable)
+    task.repeatperiod = d.get('repeatperiod', task.repeatperiod)
+    task.percentage = d.get('percentage', task.percentage)
+    task.expcost = d.get('expcost', task.expcost)
+    task.actcost = d.get('actcost', task.actcost)
+    task.quality = d.get('quality', task.quality)
+    return task
+
+
+# if __name__ == '__main__':
+#     task = Task("by python", 18, 18)
+#     task.repeatperiod=5
+#     # db.session.add(task)
+#     # db.session.commit()
+#     params = {'description': 'by python'}
+#     tasks = Task.query.filter_by(**params).order_by("crtdate desc").limit(10).offset(0).all()
+#     for item in tasks:
+#         print item.id
+#         print item.uuid
+#         # print item.owner[0]
 

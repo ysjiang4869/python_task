@@ -92,7 +92,7 @@ def delete(task_id):
 
 
 def start():
-    app.run(debug=True)
+    app.run(port=8084)
 
 
 if __name__ == '__main__':
